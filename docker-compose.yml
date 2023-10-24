@@ -1,0 +1,47 @@
+services:
+  vaultwarden:
+    image: vaultwarden/server:latest
+    container_name: vaultwarden
+    restart: always
+    environment:
+      ADMIN_TOKEN: ${ADMIN_TOKEN}
+      ORG_CREATION_USERS: ${ORG_CREATION_USERS}
+      DOMAIN: "https://${DOMAIN}"
+      INVITATION_ORG_NAME: ${INVITATION_ORG_NAME}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_FROM: ${SMTP_FROM}
+      SMTP_FROM_NAME: ${SMTP_FROM_NAME}
+      SMTP_SECURITY: force_tls
+      SMTP_PORT: 465
+      SMTP_USERNAME: ${SMTP_USERNAME}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SMTP_TIMEOUT: 15
+      IP_HEADER: X-Forwarded-For
+      SIGNUPS_ALLOWED: false
+      WEBSOCKET_ENABLED: true
+      EXTENDED_LOGGING: true
+      LOG_FILE: "/data/logs/log"
+      YUBICO_CLIENT_ID: ${YUBICO_CLIENT_ID}
+      YUBICO_SECRET_KEY: ${YUBICO_SECRET_KEY}
+      PUSH_INSTALLATION_ID: ${PUSH_INSTALLATION_ID}
+      PUSH_INSTALLATION_KEY: ${PUSH_INSTALLATION_KEY}
+      PUSH_ENABLED: true
+    volumes:
+      - /opt/bitwarden:/data
+    networks:
+      - vaultwarden-network
+
+  web:
+    image: nginx
+    volumes:
+    - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    environment:
+    - NGINX_HOST: ${DOMAIN}
+    networks:
+      - vaultwarden-network
+    ports:
+      - "80:80"
+
+networks:
+  vaultwarden-network:
+    driver: bridge
